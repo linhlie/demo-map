@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "304514689024",
+    "firebase_url": "https://map-android-ee303.firebaseio.com",
+    "project_id": "map-android-ee303",
+    "storage_bucket": "map-android-ee303.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:304514689024:android:c35ef239cc08b688b550e5",
+        "android_client_info": {
+          "package_name": "com.example.app.kidstracking"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "304514689024-qm3k0edsp974hbmandca9jqbromde8in.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.app.kidstracking",
+            "certificate_hash": "4560a0f98d3d11caf1793a4b630bba7d75c8dea5"
+          }
+        },
+        {
+          "client_id": "304514689024-gpqjfju5up065f3jr523534hht3gcrnj.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnqIXchutq45pZlCvbVTSLgvukflGYtrw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "304514689024-gpqjfju5up065f3jr523534hht3gcrnj.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
