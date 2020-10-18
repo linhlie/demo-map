@@ -1,24 +1,36 @@
 package com.example.app.kidstracking;
 
 import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 
 import com.example.app.kidstracking.model.MapDTO;
+import com.example.app.kidstracking.model.NotiDTO;
 import com.example.app.kidstracking.utilities.Notification;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.Date;
 import java.util.Timer;
@@ -29,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.Calendar;
 
 public class Service extends android.app.Service {
+    protected static final int CHANNEL_ID = 1337;
     protected static final int NOTIFICATION_ID = 1337;
     private static String TAG = "Service";
     private static Service mCurrentService;
@@ -45,6 +58,9 @@ public class Service extends android.app.Service {
     final FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference ref = database.getReference("server/saving-data/maps");
 
+    DatabaseReference noti = database.getReference("server/saving-data/Notification");
+
+    DatabaseReference check = database.getReference("server/saving-data/check");
 
     @Override
     public void onCreate() {
@@ -102,9 +118,8 @@ public class Service extends android.app.Service {
 
             try {
                 Notification notification = new Notification();
-                startForeground(NOTIFICATION_ID, notification.setNotification(this, "Service notification", "This is the service's notification", R.drawable.ic_sleep));
+                startForeground(NOTIFICATION_ID, notification.setNotification(this, "Kids Tracking", "Kids Tracking đang chạy!", R.drawable.ic_sleep));
                 Log.i(TAG, "restarting foreground successful");
-//
                 getLocations();
                 startTimer();
             } catch (Exception e) {
@@ -183,7 +198,7 @@ public class Service extends android.app.Service {
 //                                    Log.i("Starting Location!", );
                                     Location location = (Location) o;
                                     Date currentTime = Calendar.getInstance().getTime();
-                                    ref.child(String.valueOf(currentTime)).setValue(new MapDTO(location.getLatitude(), location.getLongitude()));
+//                                    ref.child(String.valueOf(currentTime)).setValue(new MapDTO(location.getLatitude(), location.getLongitude()));
                                     Log.i("Starting Location getLatitude!", String.valueOf(location.getLatitude()));
                                     Log.i("Starting Location getLongitude!", String.valueOf(location.getLongitude()));
                                 }
@@ -192,6 +207,57 @@ public class Service extends android.app.Service {
                     }
                 }, 0, 30, TimeUnit.SECONDS);
 
+
+        //receive notification
+
+        check.addChildEventListener(new ChildEventListener() {
+            MediaPlayer mediaPlayer;
+            @Override
+            public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                boolean check = (boolean) snapshot.getValue();
+                Log.i("check", String.valueOf(check));
+//
+                if (check){
+                    mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sos);
+                    mediaPlayer.start();
+                } else {
+                mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sos);
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }
+            }
+
+            @Override
+            public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+//
+                boolean check = (boolean) snapshot.getValue();
+                Log.i("check", String.valueOf(check));
+//
+                if (check){
+                    mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sos);
+                    mediaPlayer.start();
+                } else {
+//                    mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.sos);
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                }
+            }
+
+            @Override
+            public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
 
         Log.i(TAG, "Starting timer");
 

@@ -1,21 +1,13 @@
 package com.example.app.kidstracking;
 
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.media.MediaPlayer;
-import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.Toast;
 
 import com.example.app.kidstracking.model.MapDTO;
 import com.example.app.kidstracking.service.RestartServiceBroadcastReceiver;
@@ -35,46 +27,38 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private ArrayList<MapDTO> mapDTOS;
-    private Button btn;
 
     final FirebaseDatabase database = FirebaseDatabase.getInstance();
     DatabaseReference ref = database.getReference("server/saving-data/maps");
+
+    DatabaseReference check = database.getReference("server/saving-data/check");
+
+    Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        btn = findViewById(R.id.btn_next);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        button = (Button)findViewById(R.id.nextSOS);
 
+        check.child(String.valueOf("check")).setValue(false);
 
-//        DatabaseReference postsRef = ref.child("maps");
-
-//        DatabaseReference newPostRef = postsRef.push();
-        ref.child("id").setValue(new MapDTO(20.983650, 105.792398));
-        ref.child("id1").setValue(new MapDTO(20.985580, 105.795075));
-        ref.child("id2").setValue(new MapDTO(20.985800, 105.794903));
-
-//        startService(new Intent(this, ServiceSchedule.class));
-
-        btn.setOnClickListener(new View.OnClickListener() {
+        button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), PostActivity.class);
-                startActivity(intent);
-            }
+                Intent intent = new Intent(view.getContext(), SOSActivity.class);
+                view.getContext().startActivity(intent);}
         });
+//
     }
 
     @Override
@@ -97,9 +81,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
           public void onDataChange(DataSnapshot dataSnapshot) {
 //              mapDTOS.clear();
               for (DataSnapshot snapshot : dataSnapshot.getChildren()){
+
                   MapDTO map = snapshot.getValue(MapDTO.class);
 //                  ((ArrayList) mapDTOS ).add(map);
                   mapDTOS.add(map);
+
               }
               // Add a marker in Sydney and move the camera
               LatLng start = new LatLng(mapDTOS.get(0).getLatitude(), mapDTOS.get(0).getLongitude());
@@ -107,7 +93,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
               //tao 1 marker
               mMap.addMarker(new MarkerOptions()
                       .position(end)
-                      .title("Bưu điện - Hà Đông")
+                      .title("Điểm kết thúc!")
                       .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker))
               );
               for (int i = 0; i < mapDTOS.size() - 1; i++) {
@@ -123,7 +109,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                   );
               }
 
-              mMap.addMarker(new MarkerOptions().position(start).title("Marker in KMA"));
+              mMap.addMarker(new MarkerOptions().position(start).title("Điểm bắt đầu!"));
               mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(end,18));
 
           }
